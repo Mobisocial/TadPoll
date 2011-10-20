@@ -1,10 +1,12 @@
 package org.mobisocial.pollus;
 
+import mobisocial.socialkit.musubi.AppObj;
+import mobisocial.socialkit.musubi.Musubi;
+import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import mobisocial.socialkit.Obj;
-import mobisocial.socialkit.musubi.Musubi;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -35,9 +37,8 @@ public class PollUsActivity extends Activity {
         }
     };
 
-    private class PollObj implements Obj {
+    private class PollObj extends AppObj {
         /** TODO: Publish the spec of pollus.poll **/
-        public static final String TYPE = "pollus.poll";
         public static final String FIELD_Q = "q";
 
         private final String mQuestion;
@@ -48,7 +49,7 @@ public class PollUsActivity extends Activity {
         }
 
         @Override
-        public JSONObject getJson() {
+        public JSONObject getData() {
             if (mJson == null) {
                 mJson = new JSONObject();
                 try {
@@ -59,13 +60,10 @@ public class PollUsActivity extends Activity {
         }
 
         @Override
-        public byte[] getRaw() {
-            return null;
-        }
+        public FeedRenderable getRenderable() {
+            StringBuilder html = new StringBuilder("<p><em>" + mQuestion + "</em><p>");
 
-        @Override
-        public String getType() {
-            return TYPE;
+            return FeedRenderable.fromHtml(html.toString());
         }
     }
 }
