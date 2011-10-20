@@ -13,7 +13,7 @@
             android:label="@string/app_name"
             android:name=".PollUsActivity" >
             <intent-filter >
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="mobisocial.intent.action.CONNECTED" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
