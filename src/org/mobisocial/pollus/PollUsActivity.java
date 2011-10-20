@@ -1,6 +1,7 @@
 package org.mobisocial.pollus;
 
 import mobisocial.socialkit.musubi.AppObj;
+import mobisocial.socialkit.musubi.DbObj;
 import mobisocial.socialkit.musubi.Musubi;
 import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
 
@@ -8,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -23,7 +26,36 @@ public class PollUsActivity extends Activity {
         setContentView(R.layout.main);
         findViewById(R.id.submit).setOnClickListener(mSubmitListener);
 
-        mMusubi = Musubi.getInstance(this);
+        mMusubi = Musubi.getInstance(this, getIntent());
+        if (mMusubi.hasObj()) {
+            promptForAnswer(mMusubi.getObj());
+        }
+    }
+
+    private void promptForAnswer(DbObj obj) {
+        String question = new PollObj(obj).question;
+        new AlertDialog.Builder(this)
+            .setTitle("Question")
+            .setMessage(question)
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    PollUsActivity.this.finish();
+                }
+            })
+            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    PollUsActivity.this.finish();
+                }
+            })
+            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    PollUsActivity.this.finish();
+                }
+            })
+            .create().show();
     }
 
     private View.OnClickListener mSubmitListener = new View.OnClickListener() {
@@ -41,11 +73,15 @@ public class PollUsActivity extends Activity {
         /** TODO: Publish the spec of pollus.poll **/
         public static final String FIELD_Q = "q";
 
-        private final String mQuestion;
+        private final String question;
         private JSONObject mJson;
 
         public PollObj(String question) {
-            mQuestion = question;
+            this.question = question;
+        }
+
+        public PollObj(DbObj obj) {
+            question = obj.getJson().optString(FIELD_Q);
         }
 
         @Override
@@ -53,7 +89,7 @@ public class PollUsActivity extends Activity {
             if (mJson == null) {
                 mJson = new JSONObject();
                 try {
-                    mJson.put(FIELD_Q, mQuestion);
+                    mJson.put(FIELD_Q, question);
                 } catch (JSONException e) {}
             }
             return mJson;
@@ -61,7 +97,7 @@ public class PollUsActivity extends Activity {
 
         @Override
         public FeedRenderable getRenderable() {
-            StringBuilder html = new StringBuilder("<p><em>" + mQuestion + "</em><p>");
+            StringBuilder html = new StringBuilder("<p><em>" + question + "</em><p>");
 
             return FeedRenderable.fromHtml(html.toString());
         }
